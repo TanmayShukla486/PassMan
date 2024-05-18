@@ -48,6 +48,10 @@ Tailwind CSS for modern UI/UX design.
 Contributing
 Contributions are welcome! Please follow these guidelines:
 
+
+PS: I really suck at Git so currently all code is available on the dev branch. Sorry
+
+
 Fork the repository.
 Create a new branch (git checkout -b feature/your-feature).
 Make your changes.
