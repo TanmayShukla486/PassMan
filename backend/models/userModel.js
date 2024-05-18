@@ -5,6 +5,7 @@ const userSchema = mongoose.Schema(
     username: {
       type: String,
       required: [true, 'A username is required for a profile'],
+      unique: true,
     },
     email: {
       type: String,

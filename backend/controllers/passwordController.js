@@ -56,12 +56,15 @@ const removePassword = asyncHandler(async (req, res) => {
     throw new Error('Missing fields to create password');
   }
   const userId = req.user.id;
-  const passwordToBeDeleted = await Password.find({ userId: userId, id: id });
+  const passwordToBeDeleted = await Password.findOne({
+    userId: userId,
+    _id: id,
+  });
   if (!passwordToBeDeleted) {
     res.status(404);
     throw new Error("Password doesn't exist");
   }
-  await Password.deleteOne({ userId: userId, id: id });
+  await Password.deleteOne({ _id: id });
   res.status(200).json({
     deletion: 'successful',
     deleted: passwordToBeDeleted,

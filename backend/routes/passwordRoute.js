@@ -8,7 +8,7 @@ const {
 const router = express.Router();
 
 router.use(tokenAuthorizer);
-router.route('/passwords').get(getAllPasswords).post(addPassword);
-router.route('/passwords/:id').delete(removePassword);
+router.route('/').get(getAllPasswords).post(addPassword);
+router.route('/delete').delete(removePassword);
 
 module.exports = router;
