@@ -1,11 +1,56 @@
 import { PasswordListProps, PasswordProps } from 'myTypes';
-import { FC } from 'react';
+import { ChangeEvent, FC, useContext } from 'react';
 import { useState } from 'react';
 import Lottie from 'lottie-react';
 import animation from '../assets/trash.json';
+import { AuthContext } from '../context/auth/AuthContext';
 
-const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
+const PasswordItem: FC<PasswordProps> = ({
+  password,
+  listRemove,
+}): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
+  const [email, setEmail] = useState(password.email);
+  const [pass, setPassword] = useState(password.password);
+  const [username, setUsername] = useState(password.username);
+  const { user } = useContext(AuthContext);
+
+  const onClickDelete = async () => {
+    try {
+      const data = { id: password._id };
+      console.log(data);
+      const response = await fetch(
+        'http://localhost:3000/password-api/passwords/delete',
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user?.authToken}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      const parsedData = await response.json();
+      if (!parsedData.error) {
+        listRemove(password._id);
+      } else {
+        console.log(parsedData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+  const onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  };
+  const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+  };
+
   return (
     <div
       className="
@@ -84,8 +129,9 @@ const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
               "
                   id="email"
                   name="email"
+                  onChange={(e) => onEmailChange(e)}
                   type="text"
-                  value={password.email}
+                  value={email}
                 />
               </div>
             </div>
@@ -106,8 +152,9 @@ const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
               "
                 id="username"
                 name="username"
+                onChange={(e) => onUsernameChange(e)}
                 type="text"
-                value={password.username}
+                value={username}
               />
             </div>
           </div>
@@ -125,10 +172,11 @@ const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
                 border-violet-950
                 p-2
               "
+                onChange={(e) => onPasswordChange(e)}
                 id="password"
                 name="password"
                 type="text"
-                value={password.username}
+                value={pass}
               />
             </div>
           </div>
@@ -143,6 +191,7 @@ const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
           "
           >
             <button
+              onClick={onClickDelete}
               className="
                 flex 
                 justify-center
@@ -170,11 +219,22 @@ const PasswordItem: FC<PasswordProps> = ({ password }): JSX.Element => {
   );
 };
 
-const PasswordList: FC<PasswordListProps> = ({ list }): JSX.Element => {
+const PasswordList: FC<PasswordListProps> = ({
+  list,
+  setList,
+}): JSX.Element => {
+  const listRemove = (id: string) => {
+    setList((prev) => prev.filter((val) => val._id !== id));
+  };
+
   return (
     <div className="pb-8">
       {list.map((val) => (
-        <PasswordItem password={val} />
+        <PasswordItem
+          key={val._id}
+          password={val}
+          listRemove={listRemove}
+        />
       ))}
     </div>
   );

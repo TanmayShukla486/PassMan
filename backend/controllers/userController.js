@@ -12,9 +12,14 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('Missing data or fields');
   }
   const existingUser = await User.findOne({ email });
+  const existingUserName = await User.findOne({ username });
   if (existingUser) {
     res.status(403);
     throw new Error('Email already in use');
+  }
+  if (existingUserName) {
+    res.status(403);
+    throw new Error('Username already in use');
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await User.create({
@@ -24,7 +29,10 @@ const registerUser = asyncHandler(async (req, res) => {
   });
   res.status(200).json({
     userRegistered: true,
-    newUser,
+    data: {
+      username: newUser.username,
+      email: newUser.email,
+    },
   });
 });
 
@@ -50,11 +58,13 @@ const loginUser = asyncHandler(async (req, res) => {
       },
       process.env.ACCESS_SECRET,
       {
-        expiresIn: '5m',
+        expiresIn: '12m',
       }
     );
     res.status(200).json({
-      accessToken,
+      username: retrievedUser.username,
+      email: retrievedUser.email,
+      authToken: accessToken,
     });
   } else {
     res.status(400);
@@ -72,8 +82,27 @@ const currentUser = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400);
+    throw new Error('Missing field. Cannot delete user');
+  }
+  const userToBeDeleted = await User.findOne({ email });
+  if (!userToBeDeleted) {
+    res.status(404);
+    throw new Error("User doesn't exist");
+  }
+  await User.deleteOne(userToBeDeleted);
+  res.status(200).json({
+    deletion: 'successful',
+    userDeleted: userToBeDeleted,
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
   currentUser,
+  deleteUser,
 };

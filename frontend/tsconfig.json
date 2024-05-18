@@ -23,6 +23,6 @@
     /*Custom Types*/
     "typeRoots": ["src/custom-typings", "node_modules/@types"]
   },
-  "include": ["src"],
+  "include": ["src", "src/pages/App.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
